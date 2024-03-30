@@ -3,9 +3,8 @@ const loginDB = require('../models/loginSchema');
 const registerDB = require('../models/registerSchema');
 const registerRoutes = express.Router();
 const bcrypt = require('bcryptjs');
-const physicianDB = require('../models/doctorSchema');
-const doctorDB = require('../models/doctorSchema');
 const staffDB = require('../models/staffSchema');
+const technicianDB = require('../models/technicianSchema');
 
 //User Registration
 registerRoutes.post('/user', async (req, res) => {
@@ -155,8 +154,8 @@ registerRoutes.post('/staff', async (req, res) => {
   }
 });
 
-//Doctor Registration
-registerRoutes.post('/doctor', async (req, res) => {
+//Technician Registration
+registerRoutes.post('/technician', async (req, res) => {
   try {
     console.log(req.body);
     const oldDoctor = await loginDB.findOne({ email: req.body.email });
@@ -167,7 +166,7 @@ registerRoutes.post('/doctor', async (req, res) => {
         Message: 'Email already exist, Please Log In',
       });
     }
-    const oldDoctorPhone = await physicianDB.findOne({
+    const oldDoctorPhone = await technicianDB.findOne({
       phone: req.body.phone,
     });
     if (oldDoctorPhone) {
@@ -193,7 +192,7 @@ registerRoutes.post('/doctor', async (req, res) => {
       place: req.body.place,
       // designation: req.body.designation,
     };
-    const result4 = await physicianDB(reg).save();
+    const result4 = await technicianDB(reg).save();
 
     if (result4) {
       return res.json({
@@ -201,7 +200,7 @@ registerRoutes.post('/doctor', async (req, res) => {
         Error: false,
         logdata: result3,
         regdata: result4,
-        Message: 'Doctor Registration Successful',
+        Message: 'Technician Registration Successful',
       });
     } else {
       return res.json({

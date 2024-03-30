@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const productsSchema = new mongoose.Schema({
+const sparepartsSchema = new mongoose.Schema({
+  part_name: { type: String, required: true },
   brand: { type: String, required: true },
   type: { type: String, required: true }, //lens,frame,sunglass
   model: { type: String, required: true }, //polarized, UV protection, mirrored in lens
@@ -9,5 +10,5 @@ const productsSchema = new mongoose.Schema({
   image: { type: String, required: true },
 });
 
-var productsDB = mongoose.model('products_tb', productsSchema);
-module.exports = productsDB;
+var sparepartsDB = mongoose.model('spareparts_tb', sparepartsSchema);
+module.exports = sparepartsDB;

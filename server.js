@@ -11,10 +11,11 @@ const commonRoutes = require('./src/routes/commonRoutes');
 const physicianRoutes = require('./src/routes/doctorRoutes');
 const staffRoutes = require('./src/routes/staffRoutes');
 const doctorRoutes = require('./src/routes/doctorRoutes');
+const technicianRoutes = require('./src/routes/technicianRoutes');
 
 mongoose
   .connect(
-    'mongodb+srv://maitexaSS:EPZh8v1m2U0thLE2@vproject.p2z0nmk.mongodb.net/Optical_Management_System'
+    'mongodb+srv://maitexaSS:EPZh8v1m2U0thLE2@vproject.p2z0nmk.mongodb.net/Alif_Electronics'
   )
   .then(() => {
     console.log('Database Connected');
@@ -35,7 +36,7 @@ app.use('/api', commonRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/staff', staffRoutes);
-app.use('/api/doctor', doctorRoutes);
+app.use('/api/technician', technicianRoutes);
 app.use('/api/register', registerRoutes);
 app.use('/api/login', loginRoutes);
 

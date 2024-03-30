@@ -6,11 +6,22 @@ const complaintsSchema = new mongoose.Schema({
     required: true,
   },
 
+  brand: {
+    type: String,
+    required: true,
+  },
+  model: {
+    type: String,
+    required: true,
+  },
   complaint: {
     type: String,
     required: true,
   },
-  reply:{type:String,default:'...'}
+
+  date: { type: String },
+  status: { type: String, default: 'pending' },
+  reply: { type: String, default: '...' },
 });
 
 var complaintsDB = mongoose.model('complaints_tb', complaintsSchema);

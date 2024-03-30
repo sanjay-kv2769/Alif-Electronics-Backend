@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const ordersSchema = new mongoose.Schema({
   product_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'medicine_tb',
+    ref: 'product_tb',
     required: true,
   },
   login_id: {
@@ -11,24 +11,15 @@ const ordersSchema = new mongoose.Schema({
     required: true,
   },
   address: {
-    name: { type: String, required: true },
-    phone: { type: String, required: true },
-    address: { type: String, required: true },
-    pincode: { type: String, default: '' },
-    state: { type: String, default: '' },
-    city: { type: String, default: '' },
-    landmark: { type: String, default: '' },
-    addressType: { type: String, required: true },
+    name: { type: String },
+    phone: { type: String },
+    address: { type: String },
+    pincode: { type: String },
+    state: { type: String },
+    city: { type: String },
+    landmark: { type: String },
   },
-  price: { type: Number, required: true },
-  quantity: { type: Number, default: 1, required: true },
-  subtotal: {
-    type: Number,
-    default: function () {
-      return this.price;
-    },
-  },
-  order_date: { type: Date, require: true },
+  order_date: { type: String, require: true },
   order_status: { type: String, default: 'pending', require: true },
 });
 

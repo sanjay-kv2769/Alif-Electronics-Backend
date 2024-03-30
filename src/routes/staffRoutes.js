@@ -1,5 +1,4 @@
 const express = require('express');
-const medicineDB = require('../models/productsSchema');
 const staffDB = require('../models/staffSchema');
 const ordersDB = require('../models/ordersSchema');
 const productsDB = require('../models/productsSchema');
@@ -9,7 +8,7 @@ require('dotenv').config();
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const serviceBookDB = require('../models/serviceBookingSchema');
+const complaintsDB = require('../models/complaintSchema');
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -24,7 +23,7 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage: storage });
 
-staffRoutes.post('/new-prod', upload.single('image'), async (req, res) => {
+staffRoutes.post('/add-used-tv', upload.single('image'), async (req, res) => {
   console.log(req.body.brand);
   try {
     const Product = {
@@ -32,7 +31,6 @@ staffRoutes.post('/new-prod', upload.single('image'), async (req, res) => {
       type: req.body.type,
       model: req.body.model,
       color: req.body.color,
-      material: req.body.material,
       price: req.body.price,
       description: req.body.description,
       image: req.file ? req.file.path : null,
@@ -75,110 +73,110 @@ staffRoutes.post('/new-prod', upload.single('image'), async (req, res) => {
   }
 });
 
-staffRoutes.put('/attendance-staff/:id', async (req, res) => {
-  try {
-    const loginId = req.params.id;
-    function formatDate(date) {
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    }
-    // const date = new Date();
-    const date = formatDate(new Date());
-    const isPresent = true;
-    // const isPresent = req.body.isPresent;
+// staffRoutes.put('/attendance-staff/:id', async (req, res) => {
+//   try {
+//     const loginId = req.params.id;
+//     function formatDate(date) {
+//       const day = String(date.getDate()).padStart(2, '0');
+//       const month = String(date.getMonth() + 1).padStart(2, '0');
+//       const year = date.getFullYear();
+//       return `${day}/${month}/${year}`;
+//     }
+//     // const date = new Date();
+//     const date = formatDate(new Date());
+//     const isPresent = true;
+//     // const isPresent = req.body.isPresent;
 
-    const result = await staffDB.updateOne(
-      { login_id: loginId },
-      { $push: { attendance: { date, isPresent } } }
-    );
+//     const result = await staffDB.updateOne(
+//       { login_id: loginId },
+//       { $push: { attendance: { date, isPresent } } }
+//     );
 
-    if (result.nModified === 0) {
-      return res.status(404).json({ message: 'Staff member not found' });
-    }
+//     if (result.nModified === 0) {
+//       return res.status(404).json({ message: 'Staff member not found' });
+//     }
 
-    return res
-      .status(200)
-      .json({ message: 'Attendance updated successfully', isPresent: true });
-  } catch (error) {
-    return res.status(500).json({
-      Success: false,
-      Error: true,
-      Message: 'Internal Server Error',
-      ErrorMessage: error.message,
-    });
-  }
-});
+//     return res
+//       .status(200)
+//       .json({ message: 'Attendance updated successfully', isPresent: true });
+//   } catch (error) {
+//     return res.status(500).json({
+//       Success: false,
+//       Error: true,
+//       Message: 'Internal Server Error',
+//       ErrorMessage: error.message,
+//     });
+//   }
+// });
 
-staffRoutes.get('/view-service-bookings', async (req, res) => {
-  try {
-    const bookData = await serviceBookDB.aggregate([
-      {
-        $lookup: {
-          from: 'register_tbs',
-          localField: 'login_id',
-          foreignField: 'login_id',
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-        },
-      },
-      {
-        $group: {
-          _id: '$_id',
-          login_id: {
-            $first: '$login_id',
-          },
-          complaint: {
-            $first: '$complaint',
-          },
-          date: {
-            $first: '$date',
-          },
-          name: {
-            $first: '$result.name',
-          },
-          phone: {
-            $first: '$result.phone',
-          },
-        },
-      },
-    ]);
+// staffRoutes.get('/view-service-bookings', async (req, res) => {
+//   try {
+//     const bookData = await complaintsDB.aggregate([
+//       {
+//         $lookup: {
+//           from: 'register_tbs',
+//           localField: 'login_id',
+//           foreignField: 'login_id',
+//           as: 'result',
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: '$result',
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: '$_id',
+//           login_id: {
+//             $first: '$login_id',
+//           },
+//           complaint: {
+//             $first: '$complaint',
+//           },
+//           date: {
+//             $first: '$date',
+//           },
+//           name: {
+//             $first: '$result.name',
+//           },
+//           phone: {
+//             $first: '$result.phone',
+//           },
+//         },
+//       },
+//     ]);
 
-    if (bookData) {
-      return res.status(200).json({
-        Success: true,
-        Error: false,
-        data: bookData,
-        Message: 'Booking fetched successfully',
-      });
-    } else {
-      return res.status(400).json({
-        Success: false,
-        Error: true,
-        Message: 'Booking fetching failed',
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      Success: false,
-      Error: true,
-      Message: 'Internal Server Error',
-      ErrorMessage: error.message,
-    });
-  }
-});
+//     if (bookData) {
+//       return res.status(200).json({
+//         Success: true,
+//         Error: false,
+//         data: bookData,
+//         Message: 'Booking fetched successfully',
+//       });
+//     } else {
+//       return res.status(400).json({
+//         Success: false,
+//         Error: true,
+//         Message: 'Booking fetching failed',
+//       });
+//     }
+//   } catch (error) {
+//     return res.status(500).json({
+//       Success: false,
+//       Error: true,
+//       Message: 'Internal Server Error',
+//       ErrorMessage: error.message,
+//     });
+//   }
+// });
 
-staffRoutes.put('/update-service-stat/:id/:booked_date', async (req, res) => {
+staffRoutes.put('/update-complaint-stat/:id/:booked_date', async (req, res) => {
   try {
     const loginId = req.params.id;
     const bookedDate = req.params.booked_date;
 
-    const result = await serviceBookDB.updateOne(
+    const result = await complaintsDB.updateOne(
       { login_id: loginId, date: bookedDate },
       { $set: { status: 'confirmed' } }
     );
