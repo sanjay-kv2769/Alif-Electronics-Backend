@@ -12,6 +12,7 @@ const userRoutes = express.Router();
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const sparepartsDB = require('../models/sparepartsSchema');
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -400,6 +401,33 @@ userRoutes.get('/view-feedback/:login_id', async (req, res) => {
         Success: false,
         Error: true,
         Message: 'Failed fetching Feedback ',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
+});
+
+userRoutes.get('/view-spareparts', async (req, res) => {
+  try {
+    const Data = await sparepartsDB.find();
+    if (Data) {
+      return res.status(201).json({
+        Success: true,
+        Error: false,
+        data: Data,
+        Message: 'spareparts fetched successfully',
+      });
+    } else {
+      return res.status(400).json({
+        Success: false,
+        Error: true,
+        Message: 'Failed fetching spareparts',
       });
     }
   } catch (error) {
