@@ -158,18 +158,18 @@ registerRoutes.post('/staff', async (req, res) => {
 registerRoutes.post('/technician', async (req, res) => {
   try {
     console.log(req.body);
-    const oldDoctor = await loginDB.findOne({ email: req.body.email });
-    if (oldDoctor) {
+    const oldTechnician = await loginDB.findOne({ email: req.body.email });
+    if (oldTechnician) {
       return res.status(400).json({
         Success: false,
         Error: true,
         Message: 'Email already exist, Please Log In',
       });
     }
-    const oldDoctorPhone = await technicianDB.findOne({
+    const oldTechnicianPhone = await technicianDB.findOne({
       phone: req.body.phone,
     });
-    if (oldDoctorPhone) {
+    if (oldTechnicianPhone) {
       return res.status(400).json({
         Success: false,
         Error: true,
