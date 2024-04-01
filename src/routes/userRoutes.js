@@ -98,6 +98,8 @@ userRoutes.post('/add-used-tv', upload.single('image'), async (req, res) => {
       color: req.body.color,
       price: req.body.price,
       description: req.body.description,
+      uploaded_by: 1,
+
       image: req.file ? req.file.path : null,
     };
     const Data = await productsDB(Product).save();
@@ -164,10 +166,62 @@ userRoutes.get('/view-used-tv', async (req, res) => {
     });
   }
 });
+userRoutes.get('/view-user-used-tv', async (req, res) => {
+  try {
+    const Data = await productsDB.find({ uploaded_by: 1 });
+    if (Data) {
+      return res.status(201).json({
+        Success: true,
+        Error: false,
+        data: Data,
+        Message: 'Used-TV fetched successfully',
+      });
+    } else {
+      return res.status(400).json({
+        Success: false,
+        Error: true,
+        Message: 'Failed fetching TV',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
+});
+
+userRoutes.get('/view-staff-used-tv', async (req, res) => {
+  try {
+    const Data = await productsDB.find({ uploaded_by: 2 });
+    if (Data) {
+      return res.status(201).json({
+        Success: true,
+        Error: false,
+        data: Data,
+        Message: 'Used-TV fetched successfully',
+      });
+    } else {
+      return res.status(400).json({
+        Success: false,
+        Error: true,
+        Message: 'Failed fetching TV',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
+});
 
 userRoutes.post('/place-order/:login_id/:prod_id', async (req, res) => {
   try {
-    
     const userAddress = await addressDB.findOne({
       login_id: req.params.login_id,
     });

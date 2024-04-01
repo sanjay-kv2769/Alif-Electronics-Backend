@@ -7,7 +7,9 @@ const productsSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
+  uploaded_by: { type: Number },
 });
 
 var productsDB = mongoose.model('products_tb', productsSchema);
 module.exports = productsDB;
+

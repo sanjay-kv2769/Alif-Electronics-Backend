@@ -34,6 +34,7 @@ staffRoutes.post('/add-used-tv', upload.single('image'), async (req, res) => {
       price: req.body.price,
       description: req.body.description,
       image: req.file ? req.file.path : null,
+      uploaded_by: 2,
     };
     const Data = await productsDB(Product).save();
     // console.log(Data);
