@@ -106,13 +106,16 @@ technicianRoutes.put(
         { $set: { status: 'fixed' } }
       );
 
-      if (result.nModified === 0) {
+      // if (result.nModified === 0) {
+      //   return res.status(404).json({ message: 'Staff member not found' });
+      // }
+      if (result) {
+        return res
+          .status(200)
+          .json({ message: 'Service status updated successfully' });
+      } else {
         return res.status(404).json({ message: 'Staff member not found' });
       }
-
-      return res
-        .status(200)
-        .json({ message: 'Service status updated successfully' });
     } catch (error) {
       return res.status(500).json({
         Success: false,
@@ -123,6 +126,7 @@ technicianRoutes.put(
     }
   }
 );
+
 // add spareparts
 technicianRoutes.post(
   '/add-spareparts',
