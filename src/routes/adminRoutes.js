@@ -1,5 +1,4 @@
 const express = require('express');
-const medicineDB = require('../models/productsSchema');
 const staffDB = require('../models/staffSchema');
 const loginDB = require('../models/loginSchema');
 const bcrypt = require('bcryptjs');
@@ -12,6 +11,8 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const productsDB = require('../models/productsSchema');
+const feedbacksDB = require('../models/feedbackSchema');
+const ordersDB = require('../models/ordersSchema');
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -21,20 +22,70 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'vatakara projects/medicine management',
+    folder: 'vatakara projects/alif electronics',
   },
 });
 const upload = multer({ storage: storage });
 
-// ------------------------------Medicine--------------------------------------
-
-adminRoutes.get('/', async (req, res) => {
-  res.render('dashboard');
+adminRoutes.post('/login', async (req, res, next) => {
+  try {
+    // console.log(req.body.email, req.body.password);
+    if (req.body.email && req.body.password) {
+      const oldUser = await loginDB.findOne({
+        email: req.body.email,
+      });
+      if (!oldUser) {
+        return res.render('login.ejs', { Message: 'Email Incorrect' });
+      }
+      const isPasswordCorrect = await bcrypt.compare(
+        req.body.password,
+        oldUser.password
+      );
+      // console.log(isPasswordCorrect);
+      if (!isPasswordCorrect) {
+        return res.render('login.ejs', { Message: 'Password Incorrect' });
+      }
+      return res.redirect('/api/admin/');
+    } else {
+      return res.render('login.ejs', { Message: 'All field are required' });
+    }
+  } catch (error) {
+    return res.render('login.ejs', { Message: 'Something went wrong' });
+  }
 });
 
-adminRoutes.get('/add-medicine', async (req, res) => {
+// ------------------------------Product--------------------------------------
+
+adminRoutes.get('/', async (req, res) => {
+  try {
+    const staffCount = await staffDB.countDocuments();
+    const productCount = await productsDB.countDocuments();
+    const reviewCount = await feedbacksDB.countDocuments();
+    const complaintCount = await complaintsDB.countDocuments();
+    const ordersCount = await ordersDB.countDocuments();
+
+    res.render('dashboard', {
+      staffCount,
+      productCount,
+      reviewCount,
+      complaintCount,
+      ordersCount,
+    });
+    // Send the counts as a response
+    //  res.json({ staffCount, medicineCount, reviewCount, complaintCount });
+  } catch (error) {
+    console.error('Error occurred:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// adminRoutes.get('/add-product', async (req, res) => {
+//   const data = {};
+//   res.render('add-product', { data });
+// });
+adminRoutes.get('/add-product', (req, res) => {
   const data = {};
-  res.render('add-turf', { data });
+  res.render('add-product', { data });
 });
 
 adminRoutes.post('/add-prod', upload.single('image'), async (req, res) => {
@@ -48,34 +99,35 @@ adminRoutes.post('/add-prod', upload.single('image'), async (req, res) => {
       price: req.body.price,
       description: req.body.description,
       image: req.file ? req.file.path : null,
+      uploaded_by: 3,
     };
     const Data = await productsDB(Product).save();
     // console.log(Data);
     if (Data) {
-      // const data = {
-      //   Success: true,
-      //   Error: false,
-      //   Message: 'Turf added successfully',
-      // };
-      return res.status(201).json({
+      const data = {
         Success: true,
         Error: false,
-        data: Data,
         Message: 'Product added successfully',
-        // return res.render('add-turf', { data });
-      });
+      };
+      // return res.status(201).json({
+      //   Success: true,
+      //   Error: false,
+      //   data: Data,
+      //   Message: 'Product added successfully',
+      return res.render('add-product', { data });
+      // });
     } else {
-      return res.status(400).json({
-        Success: false,
-        Error: true,
-        Message: 'Failed adding Product ',
-      });
-      // const data = {
+      // return res.status(400).json({
       //   Success: false,
       //   Error: true,
-      //   Message: 'Failed adding turf ',
-      // };
-      // return res.render('add-turf', { data });
+      //   Message: 'Failed adding Product ',
+      // });
+      const data = {
+        Success: false,
+        Error: true,
+        Message: 'Failed adding product',
+      };
+      return res.render('add-product', { data });
     }
   } catch (error) {
     return res.status(500).json({
@@ -93,7 +145,7 @@ adminRoutes.get('/view-prod', async (req, res) => {
 
     if (Data) {
       const data = {};
-      return res.render('view-medicine', { Data, data });
+      return res.render('view-product', { Data, data });
     }
 
     // if (Data) {
@@ -115,7 +167,7 @@ adminRoutes.get('/view-prod', async (req, res) => {
       Message: ' Error',
     };
     const Data = [];
-    return res.render('view-medicine', { Data, data });
+    return res.render('view-product', { Data, data });
 
     // return res.status(500).json({
     //   Success: false,
@@ -125,77 +177,80 @@ adminRoutes.get('/view-prod', async (req, res) => {
     // });
   }
 });
-adminRoutes.get('/edit-med/:id', async (req, res) => {
+adminRoutes.get('/edit-prod/:id', async (req, res) => {
   try {
-    const Data = await medicineDB.findOne({ _id: req.params.id });
+    const Data = await productsDB.findOne({ _id: req.params.id });
 
     if (Data) {
       const data = {};
 
-      res.render('edit-medicine', { Data, data });
+      res.render('edit-product', { Data, data });
     }
   } catch (error) {
     const data = {
       Message: 'Error',
     };
     const Data = [];
-    return res.render('view-medicine', { Data, data });
+    return res.render('view-product', { Data, data });
   }
 });
 
-adminRoutes.put('/update-med/:id', upload.single('image'), async (req, res) => {
-  try {
-    const previousData = await medicineDB.findOne({ _id: req.params.id });
+adminRoutes.post(
+  '/update-prod/:id',
+  upload.single('image'),
+  async (req, res) => {
+    try {
+      // console.log('body', req.body);
+      const previousData = await productsDB.findOne({ _id: req.params.id });
 
-    var Medicine = {
-      medicine: req.body ? req.body.medicine : previousData.medicine,
-      composition: req.body ? req.body.medicine : previousData.composition,
-      brand: req.body ? req.body.brand : previousData.brand,
-      strength: req.body ? req.body.strength : previousData.strength,
-      purpose: req.body ? req.body.purpose : previousData.purpose,
-      description: req.body ? req.body.description : previousData.description,
-      quantity: req.body ? req.body.quantity : previousData.quantity,
-      price: req.body ? req.body.price : previousData.price,
-      image: req.file ? req.file.path : previousData.image,
-    };
-    console.log(Medicine);
-    const Data = await medicineDB.updateOne(
-      { _id: req.params.id },
-      { $set: Medicine }
-    );
+      var Products = {
+        brand: req.body ? req.body.brand : previousData.brand,
+        type: req.body ? req.body.type : previousData.type,
+        model: req.body ? req.body.model : previousData.model,
+        color: req.body ? req.body.color : previousData.color,
+        price: req.body ? req.body.price : previousData.price,
+        description: req.body ? req.body.description : previousData.description,
+        image: req.file ? req.file.path : previousData.image,
+      };
+      // console.log(Products);
+      const Data = await productsDB.updateOne(
+        { _id: req.params.id },
+        { $set: Products }
+      );
 
-    // if (Data) {
-    // return res.status(200).json({
-    //   Success: true,
-    //   Error: false,
-    //   data: Data,
-    //   Message: 'Medicine updated successfully',
-    // });
-    // }
-    if (Data.modifiedCount == 1) {
-      // const Data = await loginData.deleteOne({ _id: id });
-      return res.redirect('/api/admin/view-med');
-    } else {
-      // return res.status(400).json({
-      //   Success: false,
-      //   Error: true,
-      //   Message: 'Failed while updating Medicine',
+      // if (Data) {
+      // return res.status(200).json({
+      //   Success: true,
+      //   Error: false,
+      //   data: Data,
+      //   Message: 'product updated successfully',
       // });
-      return res.redirect('/api/admin/view-med');
+      // }
+      if (Data.modifiedCount == 1) {
+        // const Data = await loginData.deleteOne({ _id: id });
+        return res.redirect('/api/admin/view-prod');
+      } else {
+        // return res.status(400).json({
+        //   Success: false,
+        //   Error: true,
+        //   Message: 'Failed while updating product',
+        // });
+        return res.redirect('/api/admin/view-prod');
+      }
+    } catch (error) {
+      return res.status(500).json({
+        Success: false,
+        Error: true,
+        Message: 'Internal Server Error',
+        ErrorMessage: error.message,
+      });
     }
-  } catch (error) {
-    return res.status(500).json({
-      Success: false,
-      Error: true,
-      Message: 'Internal Server Error',
-      ErrorMessage: error.message,
-    });
   }
-});
+);
 
-adminRoutes.get('/delete-med/:id', async (req, res) => {
+adminRoutes.get('/delete-prod/:id', async (req, res) => {
   try {
-    const Data = await medicineDB.deleteOne({ _id: req.params.id });
+    const Data = await productsDB.deleteOne({ _id: req.params.id });
     // if (Data) {
     //   return res.status(200).json({
     //     Success: true,
@@ -212,12 +267,12 @@ adminRoutes.get('/delete-med/:id', async (req, res) => {
     // }
     if (Data.deletedCount == 1) {
       // const Data = await loginData.deleteOne({ _id: id });
-      return res.redirect('/api/admin/view-med');
+      return res.redirect('/api/admin/view-prod');
     } else {
-      return res.redirect('/api/admin/view-med');
+      return res.redirect('/api/admin/view-prod');
     }
   } catch (error) {
-    return res.redirect('/api/admin/view-med');
+    return res.redirect('/api/admin/view-prod');
 
     // return res.status(500).json({
     //   Success: false,
@@ -236,11 +291,11 @@ adminRoutes.get('/new-staff', async (req, res) => {
 });
 
 //Staff Registration
-adminRoutes.post('/staff', async (req, res) => {
-  console.log(req.body);
+adminRoutes.get('/staff', async (req, res) => {
+  // console.log(req.query);
   try {
-    console.log(req.body);
-    const oldStaff = await loginDB.findOne({ email: req.body.email });
+    // console.log(req.query);
+    const oldStaff = await loginDB.findOne({ email: req.query.email });
     if (oldStaff) {
       // return res.status(400).json({
       //   Success: false,
@@ -254,7 +309,7 @@ adminRoutes.post('/staff', async (req, res) => {
       };
       return res.render('add-staff', { data });
     }
-    const oldStaffPhone = await staffDB.findOne({ phone: req.body.phone });
+    const oldStaffPhone = await staffDB.findOne({ phone: req.query.phone });
     if (oldStaffPhone) {
       // return res.status(400).json({
       //   Success: false,
@@ -270,19 +325,19 @@ adminRoutes.post('/staff', async (req, res) => {
       return res.render('add-staff', { data });
     }
 
-    const hashedPassword = await bcrypt.hash(req.body.password, 12);
+    const hashedPassword = await bcrypt.hash(req.query.password, 12);
     let log = {
-      email: req.body.email,
+      email: req.query.email,
       password: hashedPassword,
-      rawpassword: req.body.password,
+      rawpassword: req.query.password,
       role: 3,
     };
     const result3 = await loginDB(log).save();
     let reg = {
       login_id: result3._id,
-      name: req.body.name,
-      phone: req.body.phone,
-      place: req.body.place,
+      name: req.query.name,
+      phone: req.query.phone,
+      place: req.query.place,
       // designation: req.body.designation,
     };
     const result4 = await staffDB(reg).save();
@@ -475,7 +530,27 @@ adminRoutes.get('/view-staff/:id', async (req, res) => {
   }
 });
 
-adminRoutes.put('/update-staff/:id', async (req, res) => {
+adminRoutes.get('/edit-staff/:id', async (req, res) => {
+  try {
+    const Data = await staffDB.findOne({ login_id: req.params.id });
+    var logData = await loginDB.findOne({ _id: req.params.id });
+    // console.log(logData);
+    if (Data) {
+      const data = {};
+
+      res.render('edit-staff', { Data, logData, data });
+    }
+  } catch (error) {
+    const data = {
+      Message: 'Error',
+    };
+    const Data = [];
+    return res.render('view-staff', { Data, logData, data });
+  }
+});
+
+adminRoutes.get('/update-staff/:id', async (req, res) => {
+  // console.log('email', req.query.email);
   try {
     var loginID = req.params.id;
     const previousData = await staffDB.findOne({
@@ -486,21 +561,25 @@ adminRoutes.put('/update-staff/:id', async (req, res) => {
     });
     var Staff = {
       login_id: previousData.login_id,
-      name: req.body ? req.body.name : previousData.name,
-      phone: req.body ? req.body.phone : previousData.phone,
-      place: req.body ? req.body.place : previousData.place,
+      name: req.query.name ? req.query.name : previousData.name,
+      phone: req.query.phone ? req.query.phone : previousData.phone,
+      place: req.query.place ? req.query.place : previousData.place,
       //  image:
       //    req.file && req.file.length > 0
       //      ? req.file.path)
       //      : previousData.image,
     };
-    if (req.body.password !== undefined) {
-      var hashedPassword = await bcrypt.hash(req.body.password, 10);
+    if (req.query.password !== undefined) {
+      var hashedPassword = await bcrypt.hash(req.query.password, 10);
     }
     var StaffLoginDetails = {
-      email: req.body ? req.body.email : previousloginData.email,
-      password: req.body ? hashedPassword : previousloginData.password,
-      rawpassword: req.body ? req.body.password : previousloginData.rawpassword,
+      email: req.query.email ? req.query.email : previousloginData.email,
+      password: req.query.password
+        ? hashedPassword
+        : previousloginData.password,
+      rawpassword: req.query.password
+        ? req.query.password
+        : previousloginData.rawpassword,
     };
 
     const Data = await staffDB.updateOne(
@@ -511,22 +590,34 @@ adminRoutes.put('/update-staff/:id', async (req, res) => {
       { _id: loginID },
       { $set: StaffLoginDetails }
     );
-
     if (Data && LoginData) {
-      return res.status(200).json({
-        Success: true,
-        Error: false,
-        data: Data,
-        loginData: LoginData,
-        Message: 'Staff details updated successfully ',
-      });
+      // const Data = await loginData.deleteOne({ _id: id });
+      // console.log('Data', Data);
+      // console.log('LoginData', LoginData);
+      return res.redirect('/api/admin/view-staff');
     } else {
-      return res.status(400).json({
-        Success: false,
-        Error: true,
-        Message: 'Failed while updating Staff details',
-      });
+      // return res.status(400).json({
+      //   Success: false,
+      //   Error: true,
+      //   Message: 'Failed while updating product',
+      // });
+      return res.redirect('/api/admin/view-staff');
     }
+    // if (Data && LoginData) {
+    //   return res.status(200).json({
+    //     Success: true,
+    //     Error: false,
+    //     data: Data,
+    //     loginData: LoginData,
+    //     Message: 'Staff details updated successfully ',
+    //   });
+    // } else {
+    //   return res.status(400).json({
+    //     Success: false,
+    //     Error: true,
+    //     Message: 'Failed while updating Staff details',
+    //   });
+    // }
   } catch (error) {
     return res.status(500).json({
       Success: false,
@@ -623,9 +714,218 @@ adminRoutes.get('/view-complaints', async (req, res) => {
   }
 });
 
+adminRoutes.get('/reply-complaint/:id/:date', async (req, res) => {
+  try {
+    // console.log(req.query.reply);
+    var loginID = req.params.id;
+    var date = req.params.date;
+
+    const Data = await complaintsDB.updateOne(
+      { login_id: loginID, date: date },
+      { $set: { reply: req.query.reply } }
+    );
+
+    if (Data) {
+      // console.log('Data', Data);
+      return res.redirect('/api/admin/view-complaints');
+    } else {
+      // return res.status(400).json({
+      //   Success: false,
+      //   Error: true,
+      //   Message: 'Failed while updating product',
+      // });
+      return res.redirect('/api/admin/view-complaints');
+    }
+    // if (Data && LoginData) {
+    //   return res.status(200).json({
+    //     Success: true,
+    //     Error: false,
+    //     data: Data,
+    //     loginData: LoginData,
+    //     Message: 'Staff details updated successfully ',
+    //   });
+    // } else {
+    //   return res.status(400).json({
+    //     Success: false,
+    //     Error: true,
+    //     Message: 'Failed while updating Staff details',
+    //   });
+    // }
+  } catch (error) {
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
+});
+
 adminRoutes.get('/view-attendance', async (req, res) => {
-  const data = {};
-  res.render('attendance', { data });
+  try {
+    // const staffData = await staffDB.aggregate([
+    const Data = await staffDB.aggregate([
+      {
+        $lookup: {
+          from: 'login_tbs',
+          localField: 'login_id',
+          foreignField: '_id',
+          as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          login_id: {
+            $first: '$login_id',
+          },
+          name: {
+            $first: '$name',
+          },
+          phone: {
+            $first: '$phone',
+          },
+          place: {
+            $first: '$place',
+          },
+          designation: {
+            $first: '$designation',
+          },
+          email: {
+            $first: '$result.email',
+          },
+          rawpassword: {
+            $first: '$result.rawpassword',
+          },
+          attendanceCount: { $first: { $size: '$attendance' } },
+        },
+      },
+    ]);
+
+    // if (staffData.length > 0) {
+    if (Data.length > 0) {
+      // return res.json({
+      //   Success: true,
+      //   Error: false,
+      //   data: staffData,
+      //   Message: 'Success',
+      // });
+      const data = {};
+      // console.log(Data);
+      return res.render('attendance', { Data, data });
+    } else {
+      // return res.json({
+      //   Success: false,
+      //   Error: true,
+      //   Message: 'Failed',
+      // });
+      const data = {
+        Message: ' Error',
+      };
+      const Data = [];
+      return res.render('attendance', { Data, data });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
+});
+
+adminRoutes.get('/view-attendance/:login_id', async (req, res) => {
+  try {
+    const loginId = req.params.login_id;
+    const Data = await staffDB.findOne({ login_id: loginId });
+    // console.log(Data.name);
+    if (Data) {
+      const data = {};
+      res.render('staff-attendance', { Data, data });
+      // return res.status(404).json({ message: 'Staff not found' });
+    } else {
+      const data = {
+        Message: ' Error',
+      };
+      const Data = [];
+      return res.render('staff-attendance', { Data, data });
+    }
+    // res.json({ attendance: staff.attendance });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
+});
+
+adminRoutes.get('/view-feedback', async (req, res) => {
+  try {
+    // const staffData = await staffDB.aggregate([
+    const Data = await feedbacksDB.aggregate([
+      {
+        $lookup: {
+          from: 'login_tbs',
+          localField: 'login_id',
+          foreignField: '_id',
+          as: 'login_data',
+        },
+      },
+      {
+        $unwind: '$login_data',
+      },
+      {
+        $lookup: {
+          from: 'register_tbs',
+          localField: 'login_id',
+          foreignField: 'login_id',
+          as: 'register_data',
+        },
+      },
+      {
+        $unwind: '$register_data',
+      },
+    ]);
+
+    // if (staffData.length > 0) {
+    if (Data.length > 0) {
+      //   return res.json({
+      //     Success: true,
+      //     Error: false,
+      //     data: Data,
+      //     Message: 'Success',
+      //   });
+      const data = {};
+      return res.render('view-feedback', { Data, data });
+    } else {
+      // return res.json({
+      //   Success: false,
+      //   Error: true,
+      //   Message: 'Failed',
+      // });
+      const data = {
+        Message: ' Error',
+      };
+      const Data = [];
+      return res.render('view-feedback', { Data, data });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
 });
 
 module.exports = adminRoutes;

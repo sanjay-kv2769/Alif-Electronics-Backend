@@ -18,7 +18,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'vatakara projects/medicine management',
+    folder: 'vatakara projects/alif electronics',
   },
 });
 const upload = multer({ storage: storage });
@@ -42,14 +42,14 @@ staffRoutes.post('/add-used-tv', upload.single('image'), async (req, res) => {
       // const data = {
       //   Success: true,
       //   Error: false,
-      //   Message: 'Turf added successfully',
+      //   Message: 'product added successfully',
       // };
       return res.status(201).json({
         Success: true,
         Error: false,
         data: Data,
         Message: 'Product added successfully',
-        // return res.render('add-turf', { data });
+        // return res.render('add-product', { data });
       });
     } else {
       return res.status(400).json({
@@ -60,9 +60,9 @@ staffRoutes.post('/add-used-tv', upload.single('image'), async (req, res) => {
       // const data = {
       //   Success: false,
       //   Error: true,
-      //   Message: 'Failed adding turf ',
+      //   Message: 'Failed adding product ',
       // };
-      // return res.render('add-turf', { data });
+      // return res.render('add-product', { data });
     }
   } catch (error) {
     return res.status(500).json({
@@ -74,103 +74,103 @@ staffRoutes.post('/add-used-tv', upload.single('image'), async (req, res) => {
   }
 });
 
-// staffRoutes.put('/attendance-staff/:id', async (req, res) => {
-//   try {
-//     const loginId = req.params.id;
-//     function formatDate(date) {
-//       const day = String(date.getDate()).padStart(2, '0');
-//       const month = String(date.getMonth() + 1).padStart(2, '0');
-//       const year = date.getFullYear();
-//       return `${day}/${month}/${year}`;
-//     }
-//     // const date = new Date();
-//     const date = formatDate(new Date());
-//     const isPresent = true;
-//     // const isPresent = req.body.isPresent;
+staffRoutes.put('/attendance-staff/:id', async (req, res) => {
+  try {
+    const loginId = req.params.id;
+    function formatDate(date) {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+    // const date = new Date();
+    const date = formatDate(new Date());
+    const isPresent = true;
+    // const isPresent = req.body.isPresent;
 
-//     const result = await staffDB.updateOne(
-//       { login_id: loginId },
-//       { $push: { attendance: { date, isPresent } } }
-//     );
+    const result = await staffDB.updateOne(
+      { login_id: loginId },
+      { $push: { attendance: { date, isPresent } } }
+    );
 
-//     if (result.nModified === 0) {
-//       return res.status(404).json({ message: 'Staff member not found' });
-//     }
+    if (result.nModified === 0) {
+      return res.status(404).json({ message: 'Staff member not found' });
+    }
 
-//     return res
-//       .status(200)
-//       .json({ message: 'Attendance updated successfully', isPresent: true });
-//   } catch (error) {
-//     return res.status(500).json({
-//       Success: false,
-//       Error: true,
-//       Message: 'Internal Server Error',
-//       ErrorMessage: error.message,
-//     });
-//   }
-// });
+    return res
+      .status(200)
+      .json({ message: 'Attendance updated successfully', isPresent: true });
+  } catch (error) {
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
+});
 
-// staffRoutes.get('/view-service-bookings', async (req, res) => {
-//   try {
-//     const bookData = await complaintsDB.aggregate([
-//       {
-//         $lookup: {
-//           from: 'register_tbs',
-//           localField: 'login_id',
-//           foreignField: 'login_id',
-//           as: 'result',
-//         },
-//       },
-//       {
-//         $unwind: {
-//           path: '$result',
-//         },
-//       },
-//       {
-//         $group: {
-//           _id: '$_id',
-//           login_id: {
-//             $first: '$login_id',
-//           },
-//           complaint: {
-//             $first: '$complaint',
-//           },
-//           date: {
-//             $first: '$date',
-//           },
-//           name: {
-//             $first: '$result.name',
-//           },
-//           phone: {
-//             $first: '$result.phone',
-//           },
-//         },
-//       },
-//     ]);
+staffRoutes.get('/view-service-bookings', async (req, res) => {
+  try {
+    const bookData = await complaintsDB.aggregate([
+      {
+        $lookup: {
+          from: 'register_tbs',
+          localField: 'login_id',
+          foreignField: 'login_id',
+          as: 'result',
+        },
+      },
+      {
+        $unwind: {
+          path: '$result',
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          login_id: {
+            $first: '$login_id',
+          },
+          complaint: {
+            $first: '$complaint',
+          },
+          date: {
+            $first: '$date',
+          },
+          name: {
+            $first: '$result.name',
+          },
+          phone: {
+            $first: '$result.phone',
+          },
+        },
+      },
+    ]);
 
-//     if (bookData) {
-//       return res.status(200).json({
-//         Success: true,
-//         Error: false,
-//         data: bookData,
-//         Message: 'Booking fetched successfully',
-//       });
-//     } else {
-//       return res.status(400).json({
-//         Success: false,
-//         Error: true,
-//         Message: 'Booking fetching failed',
-//       });
-//     }
-//   } catch (error) {
-//     return res.status(500).json({
-//       Success: false,
-//       Error: true,
-//       Message: 'Internal Server Error',
-//       ErrorMessage: error.message,
-//     });
-//   }
-// });
+    if (bookData) {
+      return res.status(200).json({
+        Success: true,
+        Error: false,
+        data: bookData,
+        Message: 'Booking fetched successfully',
+      });
+    } else {
+      return res.status(400).json({
+        Success: false,
+        Error: true,
+        Message: 'Booking fetching failed',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
+});
 
 staffRoutes.put('/update-complaint-stat/:id/:booked_date', async (req, res) => {
   try {

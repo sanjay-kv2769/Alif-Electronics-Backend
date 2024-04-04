@@ -1,5 +1,4 @@
 const express = require('express');
-const medicineDB = require('../models/productsSchema');
 const doctorRoutes = express.Router();
 require('dotenv').config();
 const multer = require('multer');
@@ -16,7 +15,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'vatakara projects/medicine management',
+    folder: 'vatakara projects/alif electronics',
   },
 });
 const upload = multer({ storage: storage });

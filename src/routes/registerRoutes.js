@@ -67,9 +67,9 @@ registerRoutes.post('/user', async (req, res) => {
 
 //Staff Registration
 registerRoutes.post('/staff', async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const oldStaff = await loginDB.findOne({ email: req.body.email });
     if (oldStaff) {
       return res.status(400).json({
@@ -157,7 +157,7 @@ registerRoutes.post('/staff', async (req, res) => {
 //Technician Registration
 registerRoutes.post('/technician', async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const oldTechnician = await loginDB.findOne({ email: req.body.email });
     if (oldTechnician) {
       return res.status(400).json({
@@ -222,7 +222,7 @@ registerRoutes.post('/technician', async (req, res) => {
 //Change password
 registerRoutes.put('/pass-change/:login_id', async (req, res) => {
   const loginData = await loginDB.findOne({ _id: req.params.login_id });
-  console.log(loginData);
+  // console.log(loginData);
   const confirmPassword = await bcrypt.compare(
     req.body.password,
     loginData.password
@@ -256,7 +256,7 @@ registerRoutes.put('/pass-change/:login_id', async (req, res) => {
         }
       );
     }
-    console.log(updatePassword);
+    // console.log(updatePassword);
     if (updatePassword) {
       return res.status(200).json({
         Success: true,

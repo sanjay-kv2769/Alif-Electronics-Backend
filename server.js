@@ -40,11 +40,14 @@ app.use('/api/technician', technicianRoutes);
 app.use('/api/register', registerRoutes);
 app.use('/api/login', loginRoutes);
 
+// app.get('/', (req, res) => {
+//   res.send('hello world');
+// });
 app.get('/', (req, res) => {
-  res.send('hello world');
+  res.render('login.ejs', { Message: '' });
 });
 
-const PORT = 8080;
+const PORT = 8081;
 app.listen(PORT, () => {
   console.log('Server started on', PORT);
 });
