@@ -32,7 +32,7 @@ loginRoutes.post('/', async (req, res) => {
       return res.status(200).json({
         success: true,
         error: false,
-        message: 'Login Successful',
+        Message: 'Login Successful',
         role: oldUser.role,
         login_id: oldUser._id,
       });
