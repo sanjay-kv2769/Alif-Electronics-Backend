@@ -15,7 +15,8 @@ const technicianRoutes = require('./src/routes/technicianRoutes');
 
 mongoose
   .connect(
-    'mongodb+srv://maitexaSS:EPZh8v1m2U0thLE2@vproject.p2z0nmk.mongodb.net/Alif_Electronics'
+    'mongodb+srv://aseemmtk:wN5VarKvNFWi8bqJ@cluster0.64d02pt.mongodb.net/Alif_Electronics'
+    // 'mongodb+srv://maitexaSS:EPZh8v1m2U0thLE2@vproject.p2z0nmk.mongodb.net/Alif_Electronics'
   )
   .then(() => {
     console.log('Database Connected');
