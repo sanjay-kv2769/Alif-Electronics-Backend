@@ -188,7 +188,7 @@ staffRoutes.put('/update-complaint-stat/:id/:booked_date', async (req, res) => {
     if (result) {
       return res
         .status(200)
-        .json({ message: 'Service status updated successfully' });
+        .json({ message: 'Service status updated successfully',data:result });
     } else {
       return res.status(404).json({ message: 'Staff member not found' });
     }
