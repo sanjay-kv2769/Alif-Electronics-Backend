@@ -139,6 +139,7 @@ technicianRoutes.post(
         type: req.body.type,
         model: req.body.model,
         color: req.body.color,
+        phone: req.body.phone,
         price: req.body.price,
         description: req.body.description,
         image: req.file ? req.file.path : null,
