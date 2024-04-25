@@ -926,6 +926,8 @@ adminRoutes.get('/view-feedback', async (req, res) => {
       ErrorMessage: error.message,
     });
   }
+    
+});
 
   // Spare Products
 adminRoutes.get('/add-spare', (req, res) => {
@@ -1059,7 +1061,6 @@ adminRoutes.get('/delete-spare/:id', async (req, res) => {
   }
 });
 
-  
-});
+
 
 module.exports = adminRoutes;
