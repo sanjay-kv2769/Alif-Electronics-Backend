@@ -13,6 +13,7 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const productsDB = require('../models/productsSchema');
 const feedbacksDB = require('../models/feedbackSchema');
 const ordersDB = require('../models/ordersSchema');
+const sparepartsDB = require('../models/sparepartsSchema');
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
