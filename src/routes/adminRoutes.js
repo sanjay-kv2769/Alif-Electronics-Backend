@@ -926,6 +926,140 @@ adminRoutes.get('/view-feedback', async (req, res) => {
       ErrorMessage: error.message,
     });
   }
+
+  // Spare Products
+adminRoutes.get('/add-spare', (req, res) => {
+  const data = {};
+  res.render('add-spareparts', { data });
+});
+
+adminRoutes.post('/add-spares', upload.single('image'), async (req, res) => {
+  try {
+    const Product = {
+      part_name: req.body.part_name,
+      brand: req.body.brand,
+      type: req.body.type,
+      model: req.body.model,
+      color: req.body.color,
+      material: req.body.material,
+      price: req.body.price,
+      description: req.body.description,
+      image: req.file ? req.file.path : null,
+      // uploaded_by: 3,
+    };
+    const Data = await sparepartsDB(Product).save();
+    // console.log(Data);
+    if (Data) {
+      const data = {
+        Success: true,
+        Error: false,
+        Message: 'SPare part added successfully',
+      };
+      // return res.status(201).json({
+      //   Success: true,
+      //   Error: false,
+      //   data: Data,
+      //   Message: 'Product added successfully',
+      return res.render('add-spareparts', { data });
+      // });
+    } else {
+      // return res.status(400).json({
+      //   Success: false,
+      //   Error: true,
+      //   Message: 'Failed adding Product ',
+      // });
+      const data = {
+        Success: false,
+        Error: true,
+        Message: 'Failed adding product',
+      };
+      return res.render('add-spareparts', { data });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      Success: false,
+      Error: true,
+      Message: 'Internal Server Error',
+      ErrorMessage: error.message,
+    });
+  }
+});
+
+adminRoutes.get('/view-spare', async (req, res) => {
+  try {
+    const Data = await sparepartsDB.find();
+
+    if (Data) {
+      const data = {};
+      return res.render('view-spareparts', { Data, data });
+    }
+
+    // if (Data) {
+    //   return res.status(200).json({
+    //     Success: true,
+    //     Error: false,
+    //     data: Data,
+    //     Message: 'Products fetched successfully',
+    //   });
+    // } else {
+    //   return res.status(400).json({
+    //     Success: false,
+    //     Error: true,
+    //     Message: 'Failed getting Products ',
+    //   });
+    // }
+  } catch (error) {
+    const data = {
+      Message: ' Error',
+    };
+    const Data = [];
+    return res.render('view-spareparts', { Data, data });
+
+    // return res.status(500).json({
+    //   Success: false,
+    //   Error: true,
+    //   Message: 'Internal Server Error',
+    //   ErrorMessage: error.message,
+    // });
+  }
+});
+
+adminRoutes.get('/delete-spare/:id', async (req, res) => {
+  try {
+    const Data = await sparepartsDB.deleteOne({ _id: req.params.id });
+    // if (Data) {
+    //   return res.status(200).json({
+    //     Success: true,
+    //     Error: false,
+    //     data: Data,
+    //     Message: 'Product deleted successfully',
+    //   });
+    // } else {
+    //   return res.status(400).json({
+    //     Success: false,
+    //     Error: true,
+    //     Message: 'Failed to delete product',
+    //   });
+    // }
+    if (Data.deletedCount == 1) {
+      // const Data = await loginData.deleteOne({ _id: id });
+      return res.redirect('/api/admin/view-spare');
+    } else {
+      return res.redirect('/api/admin/view-spare');
+    }
+  } catch (error) {
+    return res.redirect('/api/admin/view-spare');
+
+    // return res.status(500).json({
+    //   Success: false,
+    //   Error: true,
+    //   Message: 'Internal Server Error',
+    //   ErrorMessage: error.message,
+    // });
+  }
+});
+
+  
 });
 
 module.exports = adminRoutes;
