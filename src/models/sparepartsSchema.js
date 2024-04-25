@@ -5,7 +5,7 @@ const sparepartsSchema = new mongoose.Schema({
   type: { type: String, required: true }, //lens,frame,sunglass
   model: { type: String, required: true }, //polarized, UV protection, mirrored in lens
   color: { type: String, required: true },
-  phone: { type: String, required: true },
+  // phone: { type: String, required: true },
   price: { type: Number, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
